@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Officer Panel | Online Violation System</title>
+
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+      :root {
+        --primary: #0e918c;
+        --secondary: #f9f9f9;
+        --accent: #14b8a6;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --card: #ffffff;
+        --shadow: rgba(0,0,0,0.09);
+        --danger: #ef4444;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background-color: var(--secondary);
+        color: var(--text);
+        transition: 0.3s;
+      }
+
+      body.dark-mode {
+        --secondary: #1a1a1a;
+        --text: #f1f1f1;
+        --card: #262626;
+        --muted: #bbbbbb;
+        --shadow: rgba(255,255,255,0.08);
+      }
+
+      header {
+        background: var(--primary);
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        box-shadow: 0 2px 8px var(--shadow);
+        padding: 10px 20px;
+      }
+
+      .header-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header-container h1 {
+        margin: 0;
+        font-size: 1.5rem;
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .back-btn,
+      .dark-mode-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: 6px;
+        padding: 6px 12px;
+        cursor: pointer;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.9rem;
+        transition: background 0.2s, color 0.2s;
+      }
+
+      .back-btn:hover,
+      .dark-mode-btn:hover {
+        background: rgba(255, 255, 255, 0.35);
+      }
+
+      main {
+        max-width: 1100px;
+        margin: 45px auto;
+        padding: 0 20px;
+      }
+
+      h2 {
+        text-align: center;
+        color: var(--primary);
+        font-size: 2rem;
+        margin-bottom: 10px;
+      }
+
+      p.subtitle {
+        text-align: center;
+        color: var(--muted);
+        max-width: 720px;
+        margin: 0 auto 25px;
+        font-size: 1.1rem;
+      }
+
+      #search-container {
+        max-width: 400px;
+        margin: 0 auto 25px;
+        display: flex;
+        gap: 10px;
+      }
+
+      #search-container input {
+        flex: 1;
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+      }
+
+      #search-container button {
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: none;
+        background: var(--primary);
+        color: white;
+        cursor: pointer;
+      }
+
+      #list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 22px;
+      }
+
+      .report-card {
+        background: var(--card);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 20px;
+        border-radius: 14px;
+        box-shadow: 0 8px 25px var(--shadow);
+        transition: 0.2s;
+      }
+
+      .report-card:hover {
+        transform: translateY(-4px);
+      }
+
+      .status {
+        padding: 6px 10px;
+        border-radius: 8px;
+        color: white;
+        font-size: .9rem;
+        font-weight: 600;
+      }
+
+      .submitted { background: #2563eb; }
+      .under_review { background: #f59e0b; }
+      .resolved { background: #22c55e; }
+      .rejected { background: #ef4444; }
+
+      select {
+        width: 100%;
+        margin-top: 8px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        background: var(--secondary);
+        color: var(--text);
+      }
+
+      .delete-btn {
+        width: 100%;
+        background: var(--danger);
+        border: none;
+        color: white;
+        padding: 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 14px;
+        font-size: 1rem;
+      }
+
+      .delete-btn:hover {
+        background: #c62828;
+      }
+
+      .no-results {
+        text-align: center;
+        padding: 40px;
+        color: var(--muted);
+        font-size: 1.2rem;
+        background: var(--card);
+        border-radius: 14px;
+        box-shadow: 0 8px 25px var(--shadow);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+
+      footer {
+        text-align: center;
+        padding: 20px;
+        color: var(--muted);
+        margin-top: 40px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="header-container">
+        <div class="header-left">
+          <button class="back-btn" id="back-btn">
+            <i class="fa-solid fa-arrow-left-long"></i>
+          </button>
+        </div>
+
+        <h1>Reports</h1>
+
+        <div class="header-right">
+          <button class="dark-mode-btn" id="dark-mode-toggle">
+            <i class="fa-solid fa-moon" id="dark-mode-icon"></i> Dark Mode
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <h2>Officer Report Management</h2>
+
+      <p class="subtitle">
+        Officer control panel provides authorized personnel with access to all submitted violation reports.
+        It enables officers to systematically review, validate, update, and resolve cases.
+        Each report contains the reporter's information, incident details, and any supporting evidence.
+        Officers are authorized to update the status of reports or remove invalid submissions as necessary.
+      </p>
+
+      <div id="search-container">
+        <input type="text" id="searchInput" placeholder="Search by violator, reporter, or violation..." />
+        <button><i class="fa-solid fa-magnifying-glass"></i></button>
+      </div>
+
+      <div id="list"></div>
+    </main>
+
+    <footer>© 2025 Online Violation Reporting System</footer>
+
+    <script>
+      feather.replace();
+
+      document.getElementById("back-btn").onclick = () => window.history.back();
+
+      const darkToggle = document.getElementById("dark-mode-toggle");
+      if (localStorage.getItem("darkMode") === "enabled") {
+        document.body.classList.add("dark-mode");
+        darkToggle.innerHTML = `<i class="fa-solid fa-sun"></i> Light Mode`;
+      }
+      darkToggle.addEventListener("click", () => {
+        document.body.classList.toggle("dark-mode");
+        if (document.body.classList.contains("dark-mode")) {
+          darkToggle.innerHTML = `<i class="fa-solid fa-sun"></i> Light Mode`;
+          localStorage.setItem("darkMode", "enabled");
+        } else {
+          darkToggle.innerHTML = `<i class="fa-solid fa-moon"></i> Dark Mode`;
+          localStorage.setItem("darkMode", "disabled");
+        }
+      });
+
+      const token = localStorage.getItem("token");
+      const list = document.getElementById("list");
+      const searchInput = document.getElementById("searchInput");
+
+      let allReports = [];
+
+      window.onload = loadReports;
+
+      async function loadReports() {
+        list.innerHTML = "<p style='text-align:center;color:gray;'>Loading reports...</p>";
+
+        const res = await fetch("/api/all-violations", {
+          headers: { authorization: token ? "Bearer " + token : "" }
+        });
+
+        if (res.status !== 200) {
+          list.innerHTML = "<p style='text-align:center;color:red;'>⚠ Officer access required.</p>";
+          return;
+        }
+
+        const data = await res.json();
+        allReports = data;
+        renderReports(allReports);
+      }
+
+      function renderReports(data) {
+        if (data.length === 0) {
+          list.innerHTML = `
+            <div class="no-results">
+              <i class="fa-solid fa-magnifying-glass fa-2x"></i>
+              <p>No reports match your search.</p>
+            </div>
+          `;
+          return;
+        }
+
+        list.innerHTML = data.map(r => `
+          <div class="report-card" data-card-id="${r.id}">
+            <div>
+            <p><b>ID:</b> ${r.id}</p>
+            <p><i class="fa-solid fa-user"></i> <b>Violator Full Name:</b> ${r.full_name || "—"}</p>
+            <p><i class="fa-solid fa-triangle-exclamation"></i> <b>Violation:</b> ${r.violation_type}</p>
+            <p><i class="fa-solid fa-user-check"></i> <b>Reporter:</b> ${r.reporter_name || "—"}</p>
+            <p><i class="fa-solid fa-address-book"></i> <b>Contact:</b> ${r.reporter_contact || "—"}</p>
+            <p><i class="fa-solid fa-calendar"></i> <b>Date:</b> ${r.incident_date || "—"}</p>
+            <p><i class="fa-solid fa-location-dot"></i> <b>Location:</b> ${r.location || "—"}</p>
+            <p><i class="fa-solid fa-file-lines"></i> <b>Description:</b> ${r.description || "—"}</p>
+            <p><i class="fa-solid fa-peso-sign"></i> <b>Charges:</b> ${r.payment_amount || "—"}</p>
+            <p><b>Status:</b> 
+              <span class="status ${r.status}">
+                ${{
+                  submitted: '<i class="fa-solid fa-paper-plane"></i>',
+                  under_review: '<i class="fa-solid fa-hourglass-half"></i>',
+                  resolved: '<i class="fa-solid fa-check-circle"></i>',
+                  rejected: '<i class="fa-solid fa-times-circle"></i>'
+                }[r.status] || ''} 
+                ${r.status.replace("_"," ")}
+              </span>
+            </p>
+            </div>
+            
+            <button class="delete-btn" onclick="deleteReport(${r.id})">
+              <i class="fa-solid fa-trash"></i> Delete Report
+            </button>
+          </div>
+        `).join("");
+      }
+
+      searchInput.addEventListener("input", () => {
+        const query = searchInput.value.toLowerCase().trim();
+        if (!query) return renderReports(allReports);
+
+        const filtered = allReports.filter(r =>
+          (r.full_name && r.full_name.toLowerCase().includes(query)) ||
+          (r.reporter_name && r.reporter_name.toLowerCase().includes(query)) ||
+          (r.violation_type && r.violation_type.toLowerCase().includes(query))
+        );
+
+        renderReports(filtered);
+      });
+
+      async function changeStatus(el) {
+        const id = el.getAttribute("data-id");
+        const status = el.value;
+
+        const res = await fetch(`/api/violations/${id}/status`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            authorization: token ? "Bearer " + token : ""
+          },
+          body: JSON.stringify({ status })
+        });
+
+        if (res.ok) {
+          alert("Status updated.");
+          const badge = el.closest(".report-card").querySelector(".status");
+          badge.textContent = status.replace("_"," ");
+          badge.className = "status " + status;
+        }
+      }
+
+      async function deleteReport(id) {
+        if (!confirm("Delete this report?")) return;
+
+        const res = await fetch(`/api/violations/${id}`, {
+          method: "DELETE",
+          headers: { authorization: token ? "Bearer " + token : "" }
+        });
+
+        if (res.ok) {
+          alert("Report deleted.");
+          document.querySelector(`[data-card-id='${id}']`).remove();
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Code | Online Violation System</title>
+    <style>
+      :root {
+        --primary: #0e918c;
+        --secondary: #f9f9f9;
+        --accent: #14b8a6;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --card: #ffffff;
+        --shadow: rgba(0, 0, 0, 0.08);
+        --danger: #ef4444;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background-color: var(--secondary);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        animation: fadeIn 0.5s ease;
+      }
+
+      .verify-container {
+        background-color: var(--card);
+        padding: 32px 40px;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px var(--shadow);
+        width: 100%;
+        max-width: 420px;
+        text-align: center;
+      }
+
+      h2 {
+        color: var(--primary);
+        margin-bottom: 16px;
+        font-size: 1.6rem;
+      }
+
+      p {
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin-bottom: 24px;
+      }
+
+      .code-input {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .code-input input {
+        width: 45px;
+        height: 50px;
+        font-size: 1.4rem;
+        text-align: center;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        transition: border 0.3s, box-shadow 0.3s;
+      }
+
+      .code-input input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 5px var(--accent);
+        outline: none;
+      }
+
+      .verify-button {
+        width: 100%;
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s ease, transform 0.1s ease;
+      }
+
+      .verify-button:hover {
+        background-color: var(--accent);
+        transform: translateY(-2px);
+      }
+
+      .resend {
+        display: block;
+        margin-top: 18px;
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9rem;
+        cursor: pointer;
+      }
+
+      .resend:hover {
+        text-decoration: underline;
+      }
+
+      .message {
+        margin-top: 14px;
+        font-size: 0.9rem;
+      }
+
+      .success {
+        color: #22c55e;
+      }
+
+      .error {
+        color: var(--danger);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="verify-container">
+      <h2>Verify Your Email</h2>
+      <p>We’ve sent a 6-digit verification code to your email address.</p>
+
+      <div class="code-input" id="codeContainer">
+        <input type="text" maxlength="1" />
+        <input type="text" maxlength="1" />
+        <input type="text" maxlength="1" />
+        <input type="text" maxlength="1" />
+        <input type="text" maxlength="1" />
+        <input type="text" maxlength="1" />
+      </div>
+
+      <button class="verify-button" id="verifyBtn">Verify Code</button>
+      <div class="message" id="message"></div>
+      <span class="resend" id="resendBtn">Resend Code</span>
+    </div>
+
+    <script>
+
+      const email = localStorage.getItem("resetEmail");
+      const username = localStorage.getItem("resetUsername");
+      if (!email || !username) window.location.href = "forgot-password.html";
+
+      const inputs = document.querySelectorAll(".code-input input");
+      const message = document.getElementById("message");
+      const verifyBtn = document.getElementById("verifyBtn");
+      const resendBtn = document.getElementById("resendBtn");
+
+      inputs.forEach((input, index) => {
+        input.addEventListener("input", () => {
+          if (input.value && index < inputs.length - 1)
+            inputs[index + 1].focus();
+        });
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Backspace" && !input.value && index > 0)
+            inputs[index - 1].focus();
+        });
+      });
+
+      verifyBtn.onclick = async () => {
+        const code = Array.from(inputs)
+          .map((i) => i.value)
+          .join("")
+          .trim();
+        if (code.length !== 6) {
+          message.textContent = "⚠️ Please enter the 6-digit code.";
+          message.className = "message error";
+          return;
+        }
+
+        message.textContent = "Verifying...";
+        message.className = "message";
+
+        const res = await fetch("/api/auth/verify-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, code }),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          message.textContent = "✅ Code verified successfully!";
+          message.className = "message success";
+          localStorage.setItem("resetCode", code);
+          setTimeout(
+            () => (window.location.href = "reset-password.html"),
+            1500
+          );
+        } else {
+          message.textContent = "❌ " + (data.error || "Invalid code.");
+          message.className = "message error";
+        }
+      };
+
+      resendBtn.onclick = async () => {
+        message.textContent = "Sending new code...";
+        message.className = "message";
+
+        const res = await fetch("/api/auth/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          message.textContent = "✅ New code sent to your email.";
+          message.className = "message success";
+        } else {
+          message.textContent =
+            "❌ " + (data.error || "Failed to resend code.");
+          message.className = "message error";
+        }
+      };
+    </script>
+  </body>
+</html>

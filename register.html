@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/css/all.min.css" />
+    <title>Register | Online Violation System</title>
+
+    <style>
+      :root {
+        --primary: #0e918c;
+        --secondary: #f9f9f9;
+        --accent: #14b8a6;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --card: #ffffff;
+        --shadow: rgba(0, 0, 0, 0.08);
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background-color: var(--secondary);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      header {
+        background-color: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 24px;
+        box-shadow: 0 2px 8px var(--shadow);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 1.4rem;
+        letter-spacing: 0.5px;
+      }
+
+      nav a {
+        text-decoration: none;
+        color: white;
+        font-weight: 500;
+        margin-left: 18px;
+        padding: 8px 14px;
+        border-radius: 8px;
+        transition: background 0.3s;
+      }
+
+      nav a:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: white;
+        font-weight: 500;
+      }
+
+      .logout-btn {
+        background-color: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        padding: 6px 10px;
+        font-size: 0.9rem;
+        transition: background 0.3s;
+      }
+
+      .logout-btn:hover {
+        background-color: rgba(255, 255, 255, 0.35);
+      }
+
+      main {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .card {
+        background-color: var(--card);
+        border-radius: 12px;
+        box-shadow: 0 6px 20px var(--shadow);
+        padding: 32px;
+        width: 100%;
+        max-width: 420px;
+        animation: fadeIn 0.5s ease;
+      }
+
+      h2 {
+        color: var(--primary);
+        text-align: center;
+        margin-top: 0;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 20px;
+        padding-right: 24px;
+      }
+
+      label {
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: var(--text);
+      }
+
+      input,
+      select {
+        padding: 10px 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+        width: 100%;
+        outline: none;
+      }
+
+      input:focus,
+      select:focus {
+        border-color: var(--accent);
+      }
+
+      button {
+        background-color: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      button:hover {
+        background-color: #0d7f79;
+      }
+
+      .alert {
+        margin-top: 20px;
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: 500;
+      }
+
+      .alert.success {
+        background-color: #d1fae5;
+        color: #065f46;
+      }
+
+      .alert.error {
+        background-color: #fee2e2;
+        color: #991b1b;
+      }
+
+      footer {
+        text-align: center;
+        padding: 16px;
+        font-size: 0.9rem;
+        color: var(--muted);
+        border-top: 1px solid #ddd;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Online Violation System</h1>
+      <nav id="nav-links">
+        <a href="index.html">
+          <i class="fa-solid fa-house"></i>
+          Home
+        </a>
+        <a href="login.html">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          Login
+        </a>
+      </nav>
+      <div id="user-info" class="user-info" style="display: none">
+        <span id="username-label"></span>
+        <button class="logout-btn" id="logout-btn">Logout</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="card">
+        <h2>Create an Account</h2>
+        <form id="registerForm">
+          <div>
+            <label for="username">
+              <i class="fa-solid fa-user"></i>
+              Username
+            </label>
+            <input
+              type="text"
+              id="username"
+              required
+              placeholder="Enter your username"
+            />
+          </div>
+
+          <div>
+            <label for="email">
+              <i class="fa-solid fa-envelope"></i>
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              required
+              placeholder="Enter your email"
+            />
+          </div>
+
+          <div>
+            <label for="password">
+              <i class="fa-solid fa-lock"></i>
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              required
+              placeholder="Enter your password"
+            />
+          </div>
+
+          <div>
+            <label for="role">
+              <i class="fa-solid fa-user-shield"></i>
+              Account Type
+            </label>
+            <select id="role">
+              <option value="user">User</option>
+              <option value="officer">Officer</option>
+            </select>
+          </div>
+
+          <button type="submit">
+            <i class="fa-solid fa-user-plus"></i>
+            Register
+          </button>
+        </form>
+
+        <div id="alertBox" class="alert" style="display: none"></div>
+      </div>
+    </main>
+
+    <footer>© 2025 Online Violation Reporting System</footer>
+
+    <script>
+      function decodeToken(token) {
+        try {
+          const base64Url = token.split(".")[1];
+          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split("")
+              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          );
+          return JSON.parse(jsonPayload);
+        } catch {
+          return null;
+        }
+      }
+
+      const token = localStorage.getItem("token");
+      const userInfo = document.getElementById("user-info");
+      const usernameLabel = document.getElementById("username-label");
+      const logoutBtn = document.getElementById("logout-btn");
+      const navLinks = document.getElementById("nav-links");
+
+      if (token) {
+        const decoded = decodeToken(token);
+        if (decoded && decoded.username && decoded.role !== "admin") {
+          userInfo.style.display = "flex";
+          usernameLabel.textContent = "👤 " + decoded.username;
+          const loginLink = navLinks.querySelector('a[href="login.html"]');
+          const registerLink = navLinks.querySelector(
+            'a[href="register.html"]'
+          );
+          if (loginLink) loginLink.style.display = "none";
+          if (registerLink) registerLink.style.display = "none";
+        }
+      }
+
+      logoutBtn.onclick = () => {
+        localStorage.removeItem("token");
+        location.reload();
+      };
+
+      const form = document.getElementById("registerForm");
+      const alertBox = document.getElementById("alertBox");
+
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        alertBox.style.display = "none";
+
+        const username = document.getElementById("username").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const role = document.getElementById("role").value;
+
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ username, email, password, role }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.ok) {
+          alertBox.textContent =
+            "✅ Registration successful! You can now log in.";
+          alertBox.className = "alert success";
+          alertBox.style.display = "block";
+          form.reset();
+        } else {
+          alertBox.textContent = "❌ " + (data.error || "Registration failed");
+          alertBox.className = "alert error";
+          alertBox.style.display = "block";
+        }
+      };
+    </script>
+  </body>
+</html>

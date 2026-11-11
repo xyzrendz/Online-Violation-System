@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Violations | Online Violation System</title>
+  <link rel="stylesheet" href="css/css/all.min.css" />
+  <script src="https://js.stripe.com/v3"></script>
+
+  <style>
+    :root {
+      --primary: #0e918c;
+      --secondary: #f9f9f9;
+      --accent: #14b8a6;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --card: #ffffff;
+      --shadow: rgba(0, 0, 0, 0.1);
+      --paid-color: #00b341;
+      --unpaid-color: #ff4d4f;
+
+      --dark-primary: #0e918c;
+      --dark-secondary: #1f2937;
+      --dark-card: #2c2c2c;
+      --dark-text: #f9f9f9;
+      --dark-muted: #9ca3af;
+      --dark-shadow: rgba(0, 0, 0, 0.5);
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--secondary);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark-mode {
+      background: var(--dark-secondary);
+      color: var(--dark-text);
+    }
+
+    body.dark-mode header {
+      background: var(--dark-primary);
+    }
+
+    body.dark-mode .card {
+      background: var(--dark-card);
+      box-shadow: 0 8px 20px var(--dark-shadow);
+      color: var(--dark-text);
+    }
+
+    body.dark-mode input {
+      background: #3a3a3a;
+      color: var(--dark-text);
+    }
+
+    body.dark-mode input::placeholder {
+      color: var(--dark-muted);
+    }
+
+    body.dark-mode .modal-content {
+      background: var(--dark-card);
+      color: var(--dark-text);
+    }
+
+    body.dark-mode .modal-row {
+      color: var(--dark-text);
+    }
+
+    body.dark-mode .modal-description {
+      background: #3a3a3a;
+    }
+
+    body.dark-mode .close-btn {
+      color: var(--dark-text);
+    }
+
+    header {
+      background: var(--primary);
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: background 0.3s;
+      padding: 10px 20px;
+    }
+
+    .header-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      /* max-width: 1200px; */
+      margin: 0 auto;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-container h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* width: 100%; */
+      width: 700px;
+      text-align: center;
+    }
+
+    .back-btn, .dark-mode-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+
+    .back-btn:hover, .dark-mode-btn:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .header-center {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      position: relative;
+    }
+
+    .search-wrapper {
+      position: relative;
+      /* width: 100%; */
+      max-width: 400px;
+    }
+
+    .search-wrapper input {
+      width: 100%;
+      padding: 10px 16px 10px 40px;
+      border-radius: 24px;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transition: box-shadow 0.2s, background 0.3s, color 0.3s;
+      background: var(--card);
+      color: var(--text);
+    }
+
+    .search-wrapper input::placeholder {
+      color: var(--muted);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 1.2rem;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 20px auto 40px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: linear-gradient(145deg, #e0f7f5, #d3f0ec);
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      padding: 18px 22px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      color: var(--text);
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 14px 30px rgba(0,0,0,0.15);
+    }
+
+    .card-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+      color: inherit;
+    }
+
+    .card-line i { color: var(--primary); }
+
+    .status-icon {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+    }
+
+    .violation-type {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: white;
+    }
+
+    .violation-no-helmet { background: #f59e0b; }
+    .violation-no-license { background: #3b82f6; }
+    .violation-illegal-parking { background: #ef4444; }
+    .violation-overspeeding { background: #10b981; }
+    .violation-counterflow { background: #8b5cf6; }
+    .violation-no-seatbelt { background: #f59e0b; }
+    .violation-reckless-driving { background: #ef4444; }
+    .violation-illegal-u-turn { background: #ef4444; }
+    .violation-using-mobile-while-driving { background: #f97316; }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .modal-content {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90%;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 8px 25px var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      color: var(--text);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 12px; right: 12px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-weight: bold;
+    }
+
+    .modal-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1rem;
+      color: inherit;
+    }
+
+    .modal-row i { color: var(--primary); font-size: 1.2rem; min-width: 20px; text-align: center; }
+
+    .modal-description {
+      margin-top: 12px;
+      padding: 12px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      line-height: 1.4;
+    }
+
+    body.dark-mode .modal-description {
+      background: #3a3a3a;
+    }
+
+    .modal-body-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .modal-evidence {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .payment-status-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .pay-btn {
+      background-color: var(--paid-color);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 15px;
+      transition: background 0.3s;
+    }
+
+    .pay-btn:hover {
+      background-color: var(--primary);
+    }
+
+    .paid-text {
+      background: var(--paid-color);
+      padding: 12px 20px;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      border-top: 1px solid #ddd;
+      margin-top: 40px;
+    }
+
+    body.dark-mode footer {
+      color: var(--dark-muted);
+      border-top-color: #444;
+    }
+
+    #loading-modal .modal-content {
+      max-width: 300px;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <div class="header-left">
+        <button class="back-btn" id="back-btn"><i class="fa-solid fa-arrow-left-long"></i></button>
+      </div>
+      <h1>Violation Records</h1>
+      <div class="header-center">
+        <div class="search-wrapper">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="search-input" placeholder="Search by name or violation type...">
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="dark-mode-btn" id="dark-mode-toggle"><i class="fa-solid fa-moon" id="dark-mode-icon"></i> Dark Mode</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="violations-container"></main>
+
+  <div class="modal" id="violation-modal">
+    <div class="modal-content">
+      <button class="close-btn" id="modal-close">&times;</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="loading-modal">
+    <div class="modal-content">
+      <p>Loading payment page...</p>
+      <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; margin-top: 10px"></i>
+    </div>
+  </div>
+
+  <footer>© 2025 Online Violation Reporting System</footer>
+
+  <script>
+    document.getElementById("back-btn").onclick = () => window.history.back();
+
+    const darkToggle = document.getElementById("dark-mode-toggle");
+    if(localStorage.getItem("darkMode")==="enabled"){
+      document.body.classList.add("dark-mode");
+      darkToggle.innerHTML = `<i class="fa-solid fa-sun"></i> Light Mode`;
+    }
+    darkToggle.addEventListener("click", ()=>{
+      document.body.classList.toggle("dark-mode");
+      if(document.body.classList.contains("dark-mode")){
+        darkToggle.innerHTML = `<i class="fa-solid fa-sun"></i> Light Mode`;
+        localStorage.setItem("darkMode","enabled");
+      } else {
+        darkToggle.innerHTML = `<i class="fa-solid fa-moon"></i> Dark Mode`;
+        localStorage.setItem("darkMode","disabled");
+      }
+    });
+
+    const searchInput = document.getElementById("search-input");
+    const violationsContainer = document.getElementById("violations-container");
+    const token = localStorage.getItem("token");
+    let allViolations = [];
+
+    async function fetchViolations() {
+      if(!token){ alert("Please login first."); return; }
+      try {
+        const res = await fetch("/api/all-violations", {
+          headers: { Authorization: "Bearer " + token }
+        });
+        if(!res.ok) return console.error("Failed to fetch violations");
+        allViolations = await res.json();
+        displayViolations(allViolations);
+      } catch(err){ console.error(err); }
+    }
+
+    function displayViolations(violations){
+      violationsContainer.innerHTML = "";
+      if(violations.length===0){ violationsContainer.innerHTML="<p>No violations found.</p>"; return; }
+      violations.forEach(v=>{
+        const card = document.createElement("div");
+        card.className="card";
+
+        const statusIcon=document.createElement("div");
+        statusIcon.className="status-icon";
+        statusIcon.style.backgroundColor=v.payment_status==="PAID"? "var(--paid-color)":"var(--unpaid-color)";
+        card.appendChild(statusIcon);
+
+        const nameLine=document.createElement("div");
+        nameLine.className="card-line";
+        nameLine.innerHTML=`<i class="fa-solid fa-user"></i> <span>${v.full_name}</span>`;
+
+        const violationLine=document.createElement("div");
+        violationLine.className="card-line";
+        let typeClass = v.violation_type.toLowerCase().replace(/\s/g,'-');
+        violationLine.innerHTML=`<i class="fa-solid fa-triangle-exclamation"></i> <span class="violation-type violation-${typeClass}">${v.violation_type}</span>`;
+
+        const reporterLine=document.createElement("div");
+        reporterLine.className="card-line";
+        reporterLine.innerHTML=`<i class="fa-solid fa-user-check"></i> <span>Reported by: ${v.reporter_name}</span>`;
+
+        card.appendChild(nameLine);
+        card.appendChild(violationLine);
+        card.appendChild(reporterLine);
+
+        card.onclick = ()=>openModal(v);
+        violationsContainer.appendChild(card);
+      });
+    }
+
+    searchInput.addEventListener("input", ()=>{
+      const query = searchInput.value.toLowerCase();
+      const filtered = allViolations.filter(v =>
+        v.full_name.toLowerCase().includes(query) ||
+        v.violation_type.toLowerCase().includes(query)
+      );
+      displayViolations(filtered);
+    });
+
+    const modal = document.getElementById("violation-modal");
+    const modalBody = document.getElementById("modal-body");
+    const modalClose = document.getElementById("modal-close");
+    modalClose.onclick = ()=> modal.style.display='none';
+    window.onclick = e => { if(e.target===modal) modal.style.display='none'; }
+
+    function openModal(v){
+      modalBody.innerHTML=`
+        <div class="modal-row"><i class="fa-solid fa-user"></i><span><strong>Full Name:</strong> ${v.full_name||"N/A"}</span></div>
+        <div class="modal-row"><i class="fa-solid fa-triangle-exclamation"></i><span><strong>Type:</strong> ${v.violation_type||"N/A"}</span></div>
+        <div class="modal-row"><i class="fa-solid fa-phone"></i><span><strong>Contact:</strong> ${v.reporter_contact||"N/A"}</span></div>
+        <div class="modal-row"><i class="fa-solid fa-calendar-days"></i><span><strong>Date:</strong> ${v.incident_date||"N/A"}</span></div>
+        <div class="modal-row"><i class="fa-solid fa-location-dot"></i><span><strong>Location:</strong> ${v.location||"N/A"}</span></div>
+        <div class="modal-row modal-description"><i class="fa-solid fa-file-lines"></i> <span>${v.description||"No description available"}</span></div>
+        <div class="modal-row"><i class="fa-solid fa-peso-sign"></i><span><strong>Amount:</strong> ${v.payment_amount||"N/A"}</span></div>
+        <div class="modal-body-content">
+          ${v.evidence_image? `<img src="${v.evidence_path}" class="modal-evidence" />` : ""}
+          <div class="payment-status-container">
+            ${v.payment_status==="PAID"? `<p class="paid-text"><i class="fa-solid fa-check-circle"></i> Paid</p>`: `<button class="pay-btn" id="modal-pay-btn"><i class="fa-solid fa-credit-card"></i> Pay via Card</button>`}
+          </div>
+        </div>`;
+      modal.style.display="flex";
+      const payBtn=document.getElementById("modal-pay-btn");
+      if(payBtn) payBtn.onclick=()=>payViolation(v.id, v.payment_amount);
+    }
+
+    async function payViolation(id, amount){
+      const loading=document.getElementById("loading-modal");
+      try{
+        loading.style.display="flex";
+        const res=await fetch("/api/create-checkout-session",{
+          method:"POST",
+          headers:{"Content-Type":"application/json", Authorization:"Bearer "+token},
+          body:JSON.stringify({violationId:id, amount: amount})
+        });
+        const data=await res.json();
+        window.location.href=data.url;
+      } catch(err){ console.error(err); alert("Payment failed."); }
+      finally{ loading.style.display="none"; }
+    }
+
+    fetchViolations();
+  </script>
+</body>
+</html>

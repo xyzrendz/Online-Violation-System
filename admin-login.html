@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/css/all.min.css" />
+  <title>Admin Login | Online Violation System</title>
+
+  <style>
+    :root {
+      --primary: #0e918c;
+      --secondary: #f9f9f9;
+      --accent: #14b8a6;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --card: #ffffff;
+      --shadow: rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background-color: var(--secondary);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .card {
+      background-color: var(--card);
+      border-radius: 12px;
+      box-shadow: 0 6px 20px var(--shadow);
+      padding: 32px;
+      width: 100%;
+      max-width: 400px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    h2 {
+      color: var(--primary);
+      text-align: center;
+      margin-top: 0;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 20px;
+      padding-right: 24px;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    input {
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      width: 100%;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+    }
+
+    button {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #0d7f79;
+    }
+
+    .alert {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 500;
+      display: none;
+    }
+
+    .alert.success {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+
+    .alert.error {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      border-top: 1px solid #ddd;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="card">
+      <h2>Admin Login</h2>
+      <form id="adminLoginForm">
+        <div>
+          <label for="username">
+            <i class="fa fa-user"></i>
+            Username
+          </label>
+          <input type="text" id="username" required placeholder="Enter your username" />
+        </div>
+
+        <div>
+          <label for="password">
+            <i class="fa fa-lock"></i>
+            Password
+          </label>
+          <input type="password" id="password" required placeholder="Enter your password" />
+        </div>
+
+        <button type="submit">
+          <i class="fa fa-sign-in-alt"></i>
+          Login
+        </button>
+        <div id="alertBox" class="alert"></div>
+      </form>
+    </div>
+  </main>
+
+  <footer>© 2025 Online Violation Reporting System</footer>
+
+  <script>
+    function decodeToken(token) {
+      try {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split("")
+            .map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+            .join("")
+        );
+        return JSON.parse(jsonPayload);
+      } catch {
+        return null;
+      }
+    }
+
+    const form = document.getElementById("adminLoginForm");
+    const alertBox = document.getElementById("alertBox");
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      alertBox.style.display = "none";
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.token) {
+        const decoded = decodeToken(data.token);
+        if (decoded.role && decoded.role.toLowerCase() === "admin") {
+          localStorage.setItem("token", data.token);
+          alertBox.textContent = "✅ Admin login successful! Redirecting...";
+          alertBox.className = "alert success";
+          alertBox.style.display = "block";
+          setTimeout(() => window.location.href = "admin-dashboard.html", 1000);
+        } else {
+          alertBox.textContent = "❌ Access denied. Admins only.";
+          alertBox.className = "alert error";
+          alertBox.style.display = "block";
+        }
+      } else {
+        alertBox.textContent = "❌ " + (data.error || "Invalid credentials");
+        alertBox.className = "alert error";
+        alertBox.style.display = "block";
+      }
+    };
+  </script>
+</body>
+</html>

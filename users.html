@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard | Users</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <style>
+      :root {
+        --primary: #0e918c;
+        --secondary: #f9f9f9;
+        --accent: #14b8a6;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --card: #ffffff;
+        --shadow: rgba(0, 0, 0, 0.09);
+        --danger: #ef4444;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+        background-color: var(--secondary);
+        color: var(--text);
+        transition: 0.3s;
+      }
+
+      .sidebar {
+        width: 130px;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        padding-top: 20px;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+        transition: width 0.3s;
+        cursor: pointer;
+      }
+
+      .sidebar.collapsed {
+        width: 60px;
+      }
+      .sidebar.collapsed .sidebar-header span,
+      .sidebar.collapsed a span {
+        display: none;
+      }
+
+      .sidebar-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+
+      .sidebar-header i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+      }
+
+      .sidebar-header span {
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      .sidebar a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: white;
+        padding: 12px 20px;
+        transition: background 0.2s;
+      }
+
+      .sidebar a i {
+        min-width: 20px;
+        text-align: center;
+      }
+      .sidebar a:hover,
+      .sidebar a.active {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      header {
+        background: var(--card);
+        padding: 15px 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 4px 12px var(--shadow);
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+
+      header h1 {
+        font-size: 1.5rem;
+        color: var(--primary);
+        margin: 0;
+      }
+
+      header .admin-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      header .admin-info i {
+        font-size: 1.5rem;
+        color: var(--primary);
+      }
+
+      main {
+        flex: 1;
+        padding: 20px 25px;
+        overflow-y: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--card);
+        box-shadow: 0 8px 20px var(--shadow);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      th,
+      td {
+        padding: 12px 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        font-size: 0.95rem;
+      }
+
+      th {
+        background: var(--primary);
+        color: white;
+      }
+      tr:hover {
+        background: #f1f1f1;
+      }
+
+      select {
+        padding: 4px 6px;
+        border-radius: 5px;
+      }
+
+      .delete-btn {
+        padding: 5px 8px;
+        background: var(--danger);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+
+      .delete-btn:hover {
+        background: #c62828;
+      }
+
+      footer {
+        text-align: center;
+        padding: 20px;
+        color: var(--muted);
+        margin-top: 30px;
+      }
+
+      @media (max-width: 900px) {
+        body {
+          flex-direction: column;
+        }
+        .sidebar {
+          width: 100%;
+          flex-direction: row;
+          justify-content: space-around;
+          padding: 10px 0;
+        }
+        .sidebar.collapsed {
+          width: 100%;
+        }
+        .sidebar.collapsed a span {
+          display: inline;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <i class="fa-solid fa-user-shield"></i>
+        <span>Admin</span>
+      </div>
+      <a href="admin-dashboard.html"
+        ><i class="fa-solid fa-list"></i><span>Reports</span></a
+      >
+      <a href="#" class="active"
+        ><i class="fa-solid fa-users"></i><span>Users</span></a
+      >
+      <a href="#" id="logout-btn"
+        ><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a
+      >
+    </div>
+
+    <main>
+      <header>
+        <h1>Users Management</h1>
+        <div class="admin-info">
+          <i class="fa-solid fa-user-shield"></i>
+          <span id="admin-username"></span>
+        </div>
+      </header>
+
+      <table id="usersTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Created At</th>
+            <th>Change Role</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="9" style="text-align: center; color: gray">
+              Loading users...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+
+    <script>
+      function decodeToken(token) {
+        try {
+          const base64Url = token.split(".")[1];
+          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split("")
+              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          );
+          return JSON.parse(jsonPayload);
+        } catch {
+          return null;
+        }
+      }
+      const token = localStorage.getItem("token");
+      const tableBody = document.querySelector("#usersTable tbody");
+      const logoutBtn = document.getElementById("logout-btn");
+      const sidebar = document.getElementById("sidebar");
+
+      if (!token) {
+        tableBody.innerHTML =
+          '<tr><td colspan="9" style="text-align:center;color:red;">⚠️ Admin access required. Please log in.</td></tr>';
+      } else {
+        if (decodeToken(token)) {
+          const adminInfo = decodeToken(token);
+          document.getElementById("admin-username").textContent =
+            adminInfo.username;
+        }
+      }
+
+      logoutBtn.onclick = () => {
+        localStorage.removeItem("token");
+        location.reload();
+      };
+
+      const sidebarHeader = document.querySelector(".sidebar-header");
+
+      sidebarHeader.onclick = () => {
+        sidebar.classList.toggle("collapsed");
+        localStorage.setItem(
+          "sidebarCollapsed",
+          sidebar.classList.contains("collapsed")
+        );
+      };
+
+      if (localStorage.getItem("sidebarCollapsed") === "true") {
+        sidebar.classList.add("collapsed");
+      } else {
+        sidebar.classList.remove("collapsed");
+      }
+
+      async function loadUsers() {
+        if (!token) return;
+
+        const res = await fetch("/api/users", {
+          headers: { authorization: "Bearer " + token },
+        });
+        if (!res.ok) {
+          tableBody.innerHTML =
+            '<tr><td colspan="9" style="text-align:center;color:red;">Failed to load users or access denied.</td></tr>';
+          return;
+        }
+
+        const data = await res.json();
+        if (!data.length) {
+          tableBody.innerHTML =
+            '<tr><td colspan="9" style="text-align:center;color:gray;">No users found.</td></tr>';
+          return;
+        }
+
+        tableBody.innerHTML = data
+          .map(
+            (u) => `
+        <tr data-id="${u.id}">
+          <td>${u.id}</td>
+          <td>${u.username}</td>
+          <td>${u.email || "—"}</td>
+          <td>${u.role}</td>
+          <td>${u.created_at || "—"}</td>
+          <td>
+            <select data-id="${u.id}" onchange="changeRole(this)">
+              <option value="user" ${
+                u.role === "user" ? "selected" : ""
+              }>User</option>
+              <option value="officer" ${
+                u.role === "officer" ? "selected" : ""
+              }>Officer</option>
+              <option value="admin" ${
+                u.role === "admin" ? "selected" : ""
+              }>Admin</option>
+            </select>
+          </td>
+          <td><button class="delete-btn" onclick="deleteUser(${
+            u.id
+          })"><i class="fa-solid fa-trash"></i></button></td>
+        </tr>
+      `
+          )
+          .join("");
+      }
+
+      async function changeRole(el) {
+        const id = el.dataset.id;
+        const role = el.value;
+        const res = await fetch(`/api/users/${id}/role`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: "Bearer " + token,
+          },
+          body: JSON.stringify({ role }),
+        });
+
+        if (res.ok) alert("Role updated.");
+        else alert("Failed to update role.");
+      }
+
+      async function deleteUser(id) {
+        if (!confirm("Delete this user?")) return;
+        const res = await fetch(`/api/users/${id}`, {
+          method: "DELETE",
+          headers: { authorization: "Bearer " + token },
+        });
+        if (res.ok) {
+          document.querySelector(`tr[data-id='${id}']`).remove();
+          alert("User deleted.");
+        } else alert("Failed to delete user.");
+      }
+
+      window.onload = loadUsers;
+    </script>
+  </body>
+</html>

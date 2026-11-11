@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/css/all.min.css" />
+    <title>Online Violation System</title>
+
+    <style>
+      :root {
+        --primary: #0e918c;
+        --secondary: #f9f9f9;
+        --accent: #14b8a6;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --card: #ffffff;
+        --shadow: rgba(0, 0, 0, 0.08);
+      }
+
+      body.dark-mode {
+        --primary: #0e918c;
+        --secondary: #1a1a1a;
+        --accent: #14b8a6;
+        --text: #f1f1f1;
+        --muted: #bbbbbb;
+        --card: #262626;
+        --shadow: rgba(255, 255, 255, 0.05);
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background-color: var(--secondary);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        transition: all 0.3s ease;
+      }
+
+      header {
+        background-color: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 24px;
+        box-shadow: 0 2px 8px var(--shadow);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        letter-spacing: 0.5px;
+      }
+
+      nav a {
+        text-decoration: none;
+        color: white;
+        font-weight: 500;
+        margin-left: 16px;
+        padding: 8px 14px;
+        border-radius: 8px;
+        transition: background 0.3s;
+      }
+
+      nav a:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 500;
+      }
+
+      .logout-btn,
+      .change-password-btn,
+      .dark-mode-btn {
+        background-color: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        padding: 6px 10px;
+        font-size: 0.9rem;
+        transition: background 0.3s;
+      }
+
+      .logout-btn:hover,
+      .change-password-btn:hover,
+      .dark-mode-btn:hover {
+        background-color: rgba(255, 255, 255, 0.35);
+      }
+
+      main {
+        flex: 1;
+        max-width: 1000px;
+        margin: 50px auto;
+        padding: 0 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 50px;
+        animation: fadeIn 0.5s ease;
+      }
+
+      .hero {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+
+      .hero h2 {
+        font-size: 2rem;
+        color: var(--primary);
+        margin: 0;
+      }
+
+      .hero p {
+        font-size: 1.1rem;
+        color: var(--muted);
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.6;
+      }
+
+      .modern-card {
+        background-color: var(--card);
+        border-radius: 16px;
+        box-shadow: 0 8px 24px var(--shadow);
+        padding: 36px 28px;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+      }
+
+      .modern-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+      }
+
+      .card-header h2 {
+        color: var(--primary);
+        margin-top: 0;
+        font-size: 1.6rem;
+      }
+
+      .card-header .muted {
+        color: var(--muted);
+        line-height: 1.6;
+        font-size: 1rem;
+        margin-bottom: 24px;
+      }
+
+      .violation-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin-top: 20px;
+      }
+
+      .violation-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        background-color: var(--secondary);
+        border-radius: 12px;
+        padding: 20px 16px;
+        box-shadow: 0 2px 8px var(--shadow);
+        transition: transform 0.2s ease, background 0.3s ease, color 0.3s ease;
+        cursor: pointer;
+        text-align: center;
+      }
+
+      .violation-item:hover {
+        transform: translateY(-4px);
+        background-color: var(--accent);
+        color: white;
+      }
+
+      .violation-item .icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+      }
+
+      .violation-item .text {
+        font-weight: 500;
+        font-size: 1rem;
+      }
+
+      .how-it-works {
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+        text-align: center;
+      }
+
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 24px;
+        margin-top: 20px;
+      }
+
+      .step-card {
+        background-color: var(--card);
+        border-radius: 16px;
+        padding: 24px 16px;
+        box-shadow: 0 4px 16px var(--shadow);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+      }
+
+      .step-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px var(--shadow);
+      }
+
+      .step-card .icon {
+        font-size: 2rem;
+        margin-bottom: 12px;
+        color: var(--primary);
+      }
+
+      .features {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+      }
+
+      .feature-card {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        background-color: var(--card);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 4px 16px var(--shadow);
+        gap: 16px;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px var(--shadow);
+      }
+
+      .feature-card .icon {
+        font-size: 2rem;
+        color: var(--primary);
+      }
+
+      .testimonials {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+
+      .testimonial-card {
+        background-color: var(--card);
+        border-radius: 16px;
+        padding: 24px 20px;
+        box-shadow: 0 4px 16px var(--shadow);
+        font-style: italic;
+      }
+
+      footer {
+        text-align: center;
+        padding: 16px;
+        font-size: 0.9rem;
+        color: var(--muted);
+        border-top: 1px solid #ddd;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>Online Violation System</h1>
+      <nav id="nav-links" class="nav-links">
+        <a href="violation.html">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          Violations
+        </a>
+        <a href="report.html">
+          <i class="fa-solid fa-bell"></i>
+          Report
+        </a>
+        <a href="officer.html">
+          <i class="fa-solid fa-person-circle-exclamation"></i>
+          Reports
+        </a>
+        <a href="register.html">
+          <i class="fa-solid fa-user-plus"></i>
+          Register
+        </a>
+        <a href="login.html">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          Login
+        </a>
+      </nav>
+      <div id="user-info" class="user-info" style="display: none">
+        <span id="username-label"></span>
+        <button class="change-password-btn" id="change-password-btn">
+          <i class="fa-solid fa-lock"></i> Change Password
+        </button>
+        <button class="dark-mode-btn" id="dark-mode-toggle">
+          <i class="fa-solid fa-moon"></i> Dark Mode
+        </button>
+        <button class="logout-btn" id="logout-btn">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <div class="hero">
+        <h2>🚦 Report Violations, Anytime, Anywhere</h2>
+        <p>
+          Submit and pay violations quickly and securely. Anonymous reports are
+          allowed, and all sensitive data is encrypted for your safety.
+        </p>
+      </div>
+
+      <div class="modern-card">
+        <div class="card-header">
+          <h2>Common Violations</h2>
+          <p class="muted">
+            Easily identify and report common violations in real-time.
+          </p>
+        </div>
+        <div class="violation-list">
+          <div class="violation-item">
+            <span class="icon">🪖</span><span class="text">No Helmet</span>
+          </div>
+          <div class="violation-item">
+            <span class="icon">🪪</span><span class="text">No License</span>
+          </div>
+          <div class="violation-item">
+            <span class="icon">🚗</span
+            ><span class="text">Illegal Parking</span>
+          </div>
+          <div class="violation-item">
+            <span class="icon">💨</span><span class="text">Overspeeding</span>
+          </div>
+          <div class="violation-item">
+            <span class="icon">🔁</span><span class="text">Counterflow</span>
+          </div>
+          <div class="violation-item">
+            <span class="icon">🏎️</span><span class="text">Reckless Driving</span>
+          </div>
+          <div class="violation-item">
+            <span class="icon">↩️</span><span class="text">Illegal U-Turn</span>
+          </div>
+          <div class="violation-item">
+            <span class="icon">🚫</span><span class="text">No Seatbelt</span>
+          </div>
+          <div class="violation-item">
+            <span class="icon">📵</span
+            ><span class="text">Using Mobile While Driving</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="how-it-works">
+        <h2>How It Works</h2>
+        <div class="steps">
+          <div class="step-card">
+            <div class="icon">📲</div>
+            <h3>Step 1: Report</h3>
+            <p>Submit a violation using our online form quickly and easily.</p>
+          </div>
+          <div class="step-card">
+            <div class="icon">🔒</div>
+            <h3>Step 2: Secure</h3>
+            <p>All information is encrypted to ensure privacy and anonymity.</p>
+          </div>
+          <div class="step-card">
+            <div class="icon">⚡</div>
+            <h3>Step 3: Action</h3>
+            <p>Authorities receive instant notifications to act immediately.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="features">
+        <h2>Features</h2>
+        <div class="feature-card">
+          <div class="icon">📝</div>
+          <div>Easy Online Reporting</div>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔒</div>
+          <div>Secure & Anonymous</div>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📈</div>
+          <div>Real-Time Monitoring</div>
+        </div>
+        <div class="feature-card">
+          <div class="icon">💻</div>
+          <div>Accessible Anywhere</div>
+        </div>
+      </div>
+
+      <div class="testimonials">
+        <h2>What Users Say</h2>
+        <div class="testimonial-card">
+          "This system makes reporting violations so simple and safe!" - Maria
+          S.
+        </div>
+        <div class="testimonial-card">
+          "Finally, a reliable tool to improve community safety." - John D.
+        </div>
+        <div class="testimonial-card">
+          "I feel secure knowing my reports are anonymous." - Kevin L.
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      © 2025 Online Violation Reporting System — Developed for Safer Communities
+    </footer>
+
+    <script>
+      function decodeToken(token) {
+        try {
+          const base64Url = token.split(".")[1];
+          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split("")
+              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          );
+          return JSON.parse(jsonPayload);
+        } catch {
+          return null;
+        }
+      }
+
+      const token = localStorage.getItem("token");
+      const userInfo = document.getElementById("user-info");
+      const usernameLabel = document.getElementById("username-label");
+      const changePasswordBtn = document.getElementById("change-password-btn");
+      const logoutBtn = document.getElementById("logout-btn");
+      const navLinks = document.getElementById("nav-links");
+
+      if (token) {
+        const decoded = decodeToken(token);
+        if (decoded && decoded.username && decoded.role !== "admin") {
+          userInfo.style.display = "flex";
+          usernameLabel.textContent = "👤 " + decoded.username;
+
+          const loginLink = navLinks.querySelector('a[href="login.html"]');
+          const registerLink = navLinks.querySelector(
+            'a[href="register.html"]'
+          );
+          const violationLink = navLinks.querySelector(
+            'a[href="violation.html"]'
+          );
+          const officerLink = navLinks.querySelector('a[href="officer.html"]');
+          const reportLink = navLinks.querySelector('a[href="report.html"]');
+
+          if (decoded.role === "officer") {
+            if (violationLink) violationLink.style.display = "none";
+          } else {
+            if (reportLink) reportLink.style.display = "none";
+            if (officerLink) officerLink.style.display = "none";
+          }
+
+          if (loginLink) loginLink.style.display = "none";
+          if (registerLink) registerLink.style.display = "none";
+        } else {
+          const homeLink = navLinks.querySelector('a[href="index.html"]');
+          const officerLink = navLinks.querySelector('a[href="officer.html"]');
+          const reportLink = navLinks.querySelector('a[href="report.html"]');
+          const violationLink = navLinks.querySelector(
+            'a[href="violation.html"]'
+          );
+          if (homeLink) homeLink.style.display = "none";
+          if (reportLink) reportLink.style.display = "none";
+          if (officerLink) officerLink.style.display = "none";
+          if (violationLink) violationLink.style.display = "none";
+        }
+      } else {
+        const homeLink = navLinks.querySelector('a[href="index.html"]');
+        const officerLink = navLinks.querySelector('a[href="officer.html"]');
+        const reportLink = navLinks.querySelector('a[href="report.html"]');
+        const violationLink = navLinks.querySelector(
+          'a[href="violation.html"]'
+        );
+        if (homeLink) homeLink.style.display = "none";
+        if (reportLink) reportLink.style.display = "none";
+        if (officerLink) officerLink.style.display = "none";
+        if (violationLink) violationLink.style.display = "none";
+      }
+
+      changePasswordBtn.onclick = () => {
+        window.location.href = "change-password.html";
+      };
+
+      logoutBtn.onclick = () => {
+        localStorage.removeItem("token");
+        location.reload();
+      };
+
+      const darkToggle = document.getElementById("dark-mode-toggle");
+      if (localStorage.getItem("darkMode") === "enabled") {
+        document.body.classList.add("dark-mode");
+        darkToggle.innerHTML = `<i class="fa-solid fa-sun"></i> Light Mode`;
+      }
+
+      darkToggle.addEventListener("click", () => {
+        document.body.classList.toggle("dark-mode");
+        if (document.body.classList.contains("dark-mode")) {
+          darkToggle.innerHTML = `<i class="fa-solid fa-sun"></i> Light Mode`;
+          localStorage.setItem("darkMode", "enabled");
+        } else {
+          darkToggle.innerHTML = `<i class="fa-solid fa-moon"></i> Dark Mode`;
+          localStorage.setItem("darkMode", "disabled");
+        }
+      });
+    </script>
+  </body>
+</html>

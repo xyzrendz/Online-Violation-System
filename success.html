@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Success | Online Violation System</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #f9f9f9;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+        color: #1f2937;
+      }
+
+      .card {
+        background: white;
+        padding: 40px 30px;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 400px;
+        width: 100%;
+        transition: transform 0.2s;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+      }
+
+      .icon {
+        font-size: 3rem;
+        color: #00b341;
+        margin-bottom: 20px;
+      }
+
+      h1 {
+        margin-bottom: 10px;
+      }
+
+      p {
+        margin-bottom: 20px;
+        color: #6b7280;
+      }
+
+      .btn {
+        background-color: #0e918c;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn:hover {
+        background-color: #14b8a6;
+      }
+
+      #loading {
+        display: none;
+        margin-bottom: 20px;
+      }
+
+      #loading i {
+        font-size: 2rem;
+        color: #0e918c;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div id="loading"><i class="fas fa-spinner"></i></div>
+      <div id="status">
+        <i class="fas fa-check-circle icon"></i>
+        <h1>Payment Successful!</h1>
+        <p id="details">Verifying payment...</p>
+        <button class="btn" id="back-btn">
+          <i class="fas fa-home"></i> Back to Home
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get("session_id");
+      const statusEl = document.getElementById("status");
+      const detailsEl = document.getElementById("details");
+      const loadingEl = document.getElementById("loading");
+      const backBtn = document.getElementById("back-btn");
+
+      backBtn.onclick = () => {
+        window.location.href = "/index.html";
+      };
+
+      async function verifyPayment() {
+        if (!sessionId) {
+          detailsEl.textContent = "Invalid session. Cannot verify payment.";
+          return;
+        }
+
+        loadingEl.style.display = "block";
+        statusEl.style.display = "none";
+
+        try {
+          const res = await fetch(
+            `/api/verify-payment?session_id=${sessionId}`
+          );
+          const data = await res.json();
+
+          loadingEl.style.display = "none";
+          statusEl.style.display = "block";
+
+          if (data.payment_status === "paid") {
+            detailsEl.textContent =
+              "Your payment has been successfully processed.";
+          } else {
+            detailsEl.textContent = "Payment not completed. Please try again.";
+          }
+        } catch (err) {
+          console.error(err);
+          loadingEl.style.display = "none";
+          statusEl.style.display = "block";
+          detailsEl.textContent =
+            "Error verifying payment. Please contact support.";
+        }
+      }
+
+      verifyPayment();
+    </script>
+  </body>
+</html>
